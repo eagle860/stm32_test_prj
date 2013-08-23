@@ -15,3 +15,7 @@
 *.exe
 *.out
 *.app
+
+*.bak
+STM3210E-EVAL/
+sources_insight/
