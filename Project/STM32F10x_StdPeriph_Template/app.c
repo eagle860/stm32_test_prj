@@ -24,12 +24,12 @@ static OS_STK task3_stk[TASK3_STK_SIZE];
 static OS_STK task4_stk[TASK4_STK_SIZE];
 
 
-OS_EVENT * msg_key;     //按键邮箱事件块指针
+OS_EVENT * msg_key;     //按键消息邮箱
+OS_EVENT * msg_wav;     //播放消息邮箱
 OS_EVENT * sem_beep;    //音乐播放信号量
 OS_EVENT * q_msg;       //消息队列
 
 void * msg_grp[256];    //消息队列存储地址,最大支持256个消息
-
 
 
 //------------------------------------------------------------------------------
@@ -37,11 +37,13 @@ void * msg_grp[256];    //消息队列存储地址,最大支持256个消息
 static
 void task1(void *p_arg)
 {
-    static uint8_t *ptr;
+    uint8_t *buf_index;
     uint8_t err;
     
     while(1) {
-        ptr = OSQPend(q_msg, 0, &err); //请求消息队列
+        //ptr = OSQPend(q_msg, 0, &err); //请求消息队列
+        buf_index = (uint8_t *)OSMboxPend(msg_wav, 0, &err); //请求消息邮箱
+        prepare_data(*buf_index);
         OSTimeDly(500);
     }
 }
@@ -67,8 +69,9 @@ void task3(void *p_arg)
     uint8_t err;
 
     while(1) {
-        key = (uint8_t *)OSMboxPend(msg_key, 0, &err);
+        key = (uint8_t *)OSMboxPend(msg_key, 0, &err); //请求消息邮箱
         if(1 == *key) {
+            play_wav(); //DAC单声道8位WAV
             usart_send((uint8_t *)&wav.volume, sizeof(wav.volume));
         }
         OSTimeDly(10);
@@ -84,9 +87,9 @@ void task4(void *p_arg)
         //按键扫描
         key_scan();
         if(trg == 1) {
-            OSMboxPost(msg_key, (void *)&cnt); //发送消息
-            OSSemPost(sem_beep); //释放信号量
-            OSQPost(q_msg, "queue"); //发送队列
+            OSMboxPost(msg_key, (void *)&trg);      //发送按键消息
+            OSSemPost(sem_beep);                    //释放信号量
+            OSQPost(q_msg, "queue");                //发送队列
         }
 
         //呼吸灯
@@ -114,6 +117,7 @@ void startup_task(void *p_arg)
 #endif
 
     msg_key = OSMboxCreate((void*)0);       //创建消息邮箱
+    msg_wav = OSMboxCreate((void*)0);       //创建播放消息邮箱
     sem_beep = OSSemCreate(0);              //创建信号量
     q_msg = OSQCreate(&msg_grp[0], 256);    //创建消息队列
     

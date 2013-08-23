@@ -34,13 +34,16 @@ static uint8_t wav_init(uint8_t* pbuf)//初始化并显示文件信息
 	wav.DATAlen=Get_num(pbuf+20+wav.info_len+4,4);//数据长度	
 	return 0;
 }
+
+
+
+
+
 #include "ff.h"
 static FATFS Fatfs;
 static FIL fp;
 uint8_t wav_buf1[WAV_BUF_LEN];
 uint8_t wav_buf2[WAV_BUF_LEN];
-bool read_next = false;
-uint8_t buf_index = 0;
 uint32_t count = 0;
 bool play_wav(void)
 {
@@ -48,7 +51,6 @@ bool play_wav(void)
     f_open(&fp, "1:/rgds.wav", FA_READ|FA_WRITE|FA_OPEN_ALWAYS);
     f_lseek(&fp, 0);
     f_read(&fp, wav_buf1, WAV_BUF_LEN, &count);
-//    f_close(&fp);
 
     if(wav_init(wav_buf1) != 0) return false;
 	//根据采样率（wav.SampleRate）设置定时器，在中断中进行DA转换
@@ -56,25 +58,18 @@ bool play_wav(void)
 
 	return true;
 }
-void prepare_data(void)
+void prepare_data(uint8_t buf_index)
 {
-    if(read_next == true) {
-        read_next = false;
-        if(buf_index == 0) {
-            buf_index = 1;
-            f_read(&fp, wav_buf2, WAV_BUF_LEN, &count);
-            if(count == 0) {
-                DMA_Cmd(DMA2_Channel3, DISABLE);
-                TIM_Cmd(TIM6, DISABLE);
-            }
-        }
-        else {
-            buf_index = 0;
-            f_read(&fp, wav_buf1, WAV_BUF_LEN, &count);
-            if(count == 0) {
-                DMA_Cmd(DMA2_Channel3, DISABLE);
-                TIM_Cmd(TIM6, DISABLE);
-            }
-        }
+    if(0 == buf_index) {
+        f_read(&fp, wav_buf1, WAV_BUF_LEN, &count);
+    }
+    if(1 == buf_index) {
+        f_read(&fp, wav_buf2, WAV_BUF_LEN, &count);
+    }
+    //播放完毕
+    if(count == 0) {
+        f_close(&fp);
+        DMA_Cmd(DMA2_Channel3, DISABLE);
+        TIM_Cmd(TIM6, DISABLE);
     }
 }

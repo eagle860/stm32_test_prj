@@ -26,6 +26,7 @@
 #include "public.h"
 #include "driver_conf.h"
 #include "ucos_ii.h"
+#include "app.h"
 
 
 /** @addtogroup STM32F10x_StdPeriph_Examples
@@ -188,20 +189,27 @@ void TIM1_UP_IRQHandler(void)
 
 void DMA2_Channel3_IRQHandler(void)
 {
+	OS_CPU_SR  cpu_sr;
+    static uint8_t buf_index = 0;
+
+	OS_ENTER_CRITICAL();						   /* Tell uC/OS-II that we are starting an ISR 		 */
+	OSIntNesting++;
+	OS_EXIT_CRITICAL();
     if(DMA_GetITStatus(DMA2_IT_TC3)) {
         DMA_Cmd(DMA2_Channel3, DISABLE);
-        if(buf_index == 0) {
+        if(0 == buf_index) {
             DMA2_Channel3->CMAR = (uint32_t)wav_buf1;
-            //f_read(&fp, wav_buf2, WAV_BUF_LEN, &count);
+            buf_index = 1;
         }
         else {
             DMA2_Channel3->CMAR = (uint32_t)wav_buf2;
-            //f_read(&fp, wav_buf1, WAV_BUF_LEN, &count);
+            buf_index = 0;
         }
         DMA_Cmd(DMA2_Channel3, ENABLE);
+        OSMboxPost(msg_wav, (void *)&buf_index);
         DMA_ClearITPendingBit(DMA2_IT_TC3);
-        read_next = true;
     }
+    OSIntExit();
 }
 
 /*void TIM7_IRQHandler(void)

@@ -27,11 +27,9 @@ typedef struct
 extern WAV_file wav;
 extern uint8_t wav_buf1[WAV_BUF_LEN];
 extern uint8_t wav_buf2[WAV_BUF_LEN];
-extern bool read_next;
-extern uint8_t buf_index;
 
 
 bool play_wav(void);
-void prepare_data(void);
+void prepare_data(uint8_t buf_num);
 
 #endif

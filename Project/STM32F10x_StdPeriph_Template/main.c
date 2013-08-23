@@ -33,34 +33,6 @@ int main(void)
 
     app_init();
     for(;;){}
-
-    while (1) {
-        prepare_data();
-/*        if((cnt_ms % 10) == true) {
-            key_scan();
-            TIM_SetCompare2(TIM3, cnt_ms%1500);
-            ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-            while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
-            adc_val = ADC_GetConversionValue(ADC1);
-            wav.volume = 255 * adc_val / 0xFFF / 26 + 1;
-        }
-        if(volume_modify == true) {
-            volume_modify = false;
-            for(i = 0; i < 512; i++) {
-                //wav.file[wav.pos+512+i] = wav.file[wav.pos+512+i] / wav.volume;
-            }
-        }
-        if(trg == 1) {
-            //¶Ì°´
-        }
-        if(cont == 1) {
-            //³¤°´
-        }
-        if(flag_sec == true) {
-            flag_sec = false;
-            usart_send((uint8_t *)&wav.volume, sizeof(wav.volume));
-        }*/
-    }
 }
 
 #ifdef  USE_FULL_ASSERT
