@@ -21,4 +21,4 @@
 *.uvgui.*
 *.uvopt
 STM3210E-EVAL/
-sources_insight/
+source_insight/

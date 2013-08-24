@@ -11,10 +11,10 @@
 
 /* task stack size */
 #define STARTUP_TASK_STK_SIZE   80
-#define TASK1_STK_SIZE          80
-#define TASK2_STK_SIZE          80
-#define TASK3_STK_SIZE          80
-#define TASK4_STK_SIZE          80
+#define TASK1_STK_SIZE          1024
+#define TASK2_STK_SIZE          1024
+#define TASK3_STK_SIZE          1024
+#define TASK4_STK_SIZE          1024
 
 
 static OS_STK startup_task_stk[STARTUP_TASK_STK_SIZE];
@@ -33,7 +33,7 @@ void * msg_grp[256];    //消息队列存储地址,最大支持256个消息
 
 
 //------------------------------------------------------------------------------
-//
+//通过消息邮箱准备播放数据
 static
 void task1(void *p_arg)
 {
@@ -41,10 +41,8 @@ void task1(void *p_arg)
     uint8_t err;
     
     while(1) {
-        //ptr = OSQPend(q_msg, 0, &err); //请求消息队列
         buf_index = (uint8_t *)OSMboxPend(msg_wav, 0, &err); //请求消息邮箱
         prepare_data(*buf_index);
-        OSTimeDly(500);
     }
 }
 //------------------------------------------------------------------------------
@@ -53,8 +51,10 @@ static
 void task2(void *p_arg)
 {
     uint8_t err;
+    uint8_t *ptr;
 
     while(1) {
+        ptr = OSQPend(q_msg, 0, &err); //请求消息队列
         OSSemPend(sem_beep, 0, &err); //请求信号量
         OSTimeDly(10);
     }
@@ -83,6 +83,7 @@ static
 void task4(void *p_arg)
 {
     static uint8_t cnt = 0;
+
     while(1) {
         //按键扫描
         key_scan();
@@ -94,7 +95,7 @@ void task4(void *p_arg)
 
         //呼吸灯
         TIM_SetCompare2(TIM3, (++cnt<128)?cnt:(255-cnt));
-        
+
         //ADC采样转换为音量
         ADC_SoftwareStartConvCmd(ADC1, ENABLE);
         while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
@@ -120,7 +121,7 @@ void startup_task(void *p_arg)
     msg_wav = OSMboxCreate((void*)0);       //创建播放消息邮箱
     sem_beep = OSSemCreate(0);              //创建信号量
     q_msg = OSQCreate(&msg_grp[0], 256);    //创建消息队列
-    
+
     OS_ENTER_CRITICAL(); //进入临界区
 
     err = OSTaskCreate(task1, (void *)0,

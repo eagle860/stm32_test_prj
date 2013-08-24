@@ -189,12 +189,12 @@ void TIM1_UP_IRQHandler(void)
 
 void DMA2_Channel3_IRQHandler(void)
 {
-	OS_CPU_SR  cpu_sr;
+    OS_CPU_SR  cpu_sr;
     static uint8_t buf_index = 0;
 
-	OS_ENTER_CRITICAL();						   /* Tell uC/OS-II that we are starting an ISR 		 */
-	OSIntNesting++;
-	OS_EXIT_CRITICAL();
+    OS_ENTER_CRITICAL();						   /* Tell uC/OS-II that we are starting an ISR 		 */
+    OSIntNesting++;
+    OS_EXIT_CRITICAL();
     if(DMA_GetITStatus(DMA2_IT_TC3)) {
         DMA_Cmd(DMA2_Channel3, DISABLE);
         if(0 == buf_index) {
