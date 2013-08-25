@@ -23,7 +23,7 @@ void periph_init(void)
 //------------------------------------------------------------------------------
 void key_scan(void)
 {
-    uint8_t key_val = !GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13);
+    uint8_t key_val = !GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0);
     trg = key_val & (key_val ^ cont);
     cont = key_val;
 }
@@ -95,4 +95,3 @@ void fatfs_test(void)
 
 	return;
 }
-

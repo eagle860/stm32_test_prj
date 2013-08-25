@@ -187,6 +187,22 @@ void TIM1_UP_IRQHandler(void)
     }
 }
 
+void EXTI15_10_IRQHandler(void)
+{
+    OS_CPU_SR  cpu_sr;
+    static uint8_t key_value = 1;
+
+    OS_ENTER_CRITICAL();						   /* Tell uC/OS-II that we are starting an ISR 		 */
+    OSIntNesting++;
+    OS_EXIT_CRITICAL();
+
+    if(EXTI_GetITStatus(EXTI_Line13)) {
+        EXTI_ClearITPendingBit(EXTI_Line13);
+        OSMboxPost(msg_key, (void *)&key_value);
+    }
+    OSIntExit();
+}
+
 void DMA2_Channel3_IRQHandler(void)
 {
     OS_CPU_SR  cpu_sr;
