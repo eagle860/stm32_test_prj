@@ -12,6 +12,11 @@ ADCCLK          12M
 *******************************************************************************/
 
 
+#define FLASH_START_ADDR    ((uint32_t)0x08000000UL)
+#define FLASH_PAGE_SIZE     ((uint32_t)2048ul)
+#define PAGEn_ADDR(n)       (FLASH_START_ADDR+n*FLASH_PAGE_SIZE)
+
+
 /**
   * @brief  Main program.
   * @param  None
@@ -26,6 +31,7 @@ int main(void)
        system_stm32f10x.c file
      */
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, PAGEn_ADDR(1));
     periph_init();
 //    play_wav();//DACµ¥ÉùµÀ8Î»WAV
 //    play_midi(&xyz);
