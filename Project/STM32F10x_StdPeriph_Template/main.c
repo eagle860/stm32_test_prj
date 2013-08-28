@@ -31,7 +31,7 @@ int main(void)
        system_stm32f10x.c file
      */
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    NVIC_SetVectorTable(NVIC_VectTab_FLASH, PAGEn_ADDR(1));
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, PAGEn_ADDR(8));
     periph_init();
 //    play_wav();//DACµ¥ÉùµÀ8Î»WAV
 //    play_midi(&xyz);
